@@ -5,6 +5,8 @@ import bgVideo from "../assets/comingSoon/coming-soon-background.mp4";
 import bgSongM4a from "../assets/comingSoon/background-song.m4a";
 import bgSongMp3 from "../assets/comingSoon/background-song.mp3";
 import logoImg from "../assets/comingSoon/nitshacks-logo.png";
+import playButtonBg from "../assets/comingSoon/comingSoon_playButton_bg.png";
+
 
 export default function ComingSoon() {
   const audioRef = useRef(null);
@@ -98,6 +100,31 @@ export default function ComingSoon() {
       <div className="corner-label">
         NATIONAL INSTITUTE OF TECHNOLOGY SILCHAR
       </div>
+
+      <button
+      className="play-button"
+      type="button"
+      aria-label="Play background audio"
+      onClick={() => {
+  const audio = audioRef.current;
+  if (!audio) return;
+
+  if (audio.paused) {
+    audio.play()
+      .then(() => {
+        hasStartedRef.current = true;
+      })
+      .catch(() => {});
+  } else {
+    audio.pause();
+  }
+}}
+>
+       <img src={playButtonBg} alt="" aria-hidden="true" />
+      <span className="play-triangle" aria-hidden="true" />
+      </button>
+
+
     </main>
-  );
+    );
 }
