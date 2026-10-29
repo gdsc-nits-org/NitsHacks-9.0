@@ -3,10 +3,9 @@ import "../components/ComingSoon.css";
 
 import desktopBgVideo from "../assets/comingSoon/coming-soon-background.mp4";
 import mobileBgVideo from "../assets/comingSoon/coming-soon-background-mobile.mp4";
-import bgSongM4a from "../assets/comingSoon/background-song.m4a";
 import bgSongMp3 from "../assets/comingSoon/background-song.mp3";
 import logoImg from "../assets/comingSoon/nitshacks-logo.png";
-import playButtonBg from "../assets/comingSoon/comingSoon_playButton_bg.png";
+import playButtonBg from "../assets/comingSoon/comingSoon_playButton_bg.webp";
 
 // Watermark sparkle position in background videos (fractions of frame dimensions)
 const DESKTOP_LOGO = { x: 1160 / 1280, y: 600 / 720, radius: 26 / 1280 };
@@ -14,9 +13,16 @@ const MOBILE_LOGO = { x: 650 / 720, y: 1205 / 1280, radius: 28 / 720 };
 
 export default function ComingSoon() {
   const audioRef = useRef(null);
-  const desktopVideoRef = useRef(null);
-  const mobileVideoRef = useRef(null);
+  const videoRef = useRef(null);
   const buttonRef = useRef(null);
+
+  // Device detection to load only ONE video
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth <= 768;
+    }
+    return false;
+  });
 
   const [isPlaying, setIsPlaying] = useState(false);
   const isPlayingRef = useRef(false);
@@ -27,10 +33,18 @@ export default function ComingSoon() {
     isPlayingRef.current = playing;
   };
 
+  // Screen resize detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Compute spot to overlay precisely on the watermark logo
   const placeOnLogo = useCallback(() => {
-    const isMobile = window.innerWidth <= 768;
-    const video = isMobile ? mobileVideoRef.current : desktopVideoRef.current;
+    const video = videoRef.current;
     if (!video) return;
 
     const cw = video.clientWidth;
@@ -72,31 +86,27 @@ export default function ComingSoon() {
       y: Math.min(Math.max(cy, size / 2 + pad), ch - size / 2 - pad),
       cover,
     });
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     placeOnLogo();
     window.addEventListener("resize", placeOnLogo);
 
-    const dVid = desktopVideoRef.current;
-    const mVid = mobileVideoRef.current;
-    dVid?.addEventListener("loadedmetadata", placeOnLogo);
-    mVid?.addEventListener("loadedmetadata", placeOnLogo);
+    const video = videoRef.current;
+    video?.addEventListener("loadedmetadata", placeOnLogo);
 
     const observer =
       typeof ResizeObserver !== "undefined"
         ? new ResizeObserver(placeOnLogo)
         : null;
 
-    if (observer) {
-      if (dVid) observer.observe(dVid);
-      if (mVid) observer.observe(mVid);
+    if (observer && video) {
+      observer.observe(video);
     }
 
     return () => {
       window.removeEventListener("resize", placeOnLogo);
-      dVid?.removeEventListener("loadedmetadata", placeOnLogo);
-      mVid?.removeEventListener("loadedmetadata", placeOnLogo);
+      video?.removeEventListener("loadedmetadata", placeOnLogo);
       observer?.disconnect();
     };
   }, [placeOnLogo]);
@@ -141,37 +151,28 @@ export default function ComingSoon() {
 
   return (
     <main className="coming-page">
-      {/* Desktop Video (widescreen 16:9) */}
+      {/* 
+        Only the active video is in the DOM. 
+        Saves 3-5 MB from being downloaded unnecessarily!
+      */}
       <video
-        ref={desktopVideoRef}
-        className="background-video background-video--desktop"
+        key={isMobile ? "mobile-video" : "desktop-video"}
+        ref={videoRef}
+        className="background-video"
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
-        aria-label="Animated sunset bridge background desktop"
+        aria-label="Animated sunset bridge background"
       >
-        <source src={desktopBgVideo} type="video/mp4" />
+        <source src={isMobile ? mobileBgVideo : desktopBgVideo} type="video/mp4" />
       </video>
 
-      {/* Mobile Video (portrait 9:16) */}
-      <video
-        ref={mobileVideoRef}
-        className="background-video background-video--mobile"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        aria-label="Animated sunset bridge background mobile"
-      >
-        <source src={mobileBgVideo} type="video/mp4" />
-      </video>
-
-      {/* Audio playback on user click with tab-switch pause/resume */}
-      <audio ref={audioRef} loop preload="auto">
-        <source src={bgSongM4a} type="audio/mp4" />
+      {/* 
+        preload="none": Won't download 5MB of audio until the user clicks Play!
+      */}
+      <audio ref={audioRef} loop preload="none">
         <source src={bgSongMp3} type="audio/mpeg" />
       </audio>
 
@@ -202,7 +203,7 @@ export default function ComingSoon() {
         title={isPlaying ? "Pause music" : "Play music"}
         onClick={togglePlay}
       >
-        <img src={playButtonBg} alt="" aria-hidden="true" />
+        <img src={playButtonBg} alt="" aria-hidden="true" width="180" height="180" />
         {isPlaying ? (
           <span className="pause-icon" aria-hidden="true">
             <span className="pause-bar" />
