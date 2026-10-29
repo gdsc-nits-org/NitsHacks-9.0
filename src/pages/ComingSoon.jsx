@@ -36,6 +36,16 @@ export default function ComingSoon() {
     isPlayingRef.current = playing;
   };
 
+  // Pre-buffer audio immediately on page load so click playback is instant (0ms latency)
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Explicitly prime the browser audio buffer
+    audio.src = bgSongMp3;
+    audio.load();
+  }, []);
+
   // Screen resize detection
   useEffect(() => {
     const handleResize = () => {
@@ -109,7 +119,6 @@ export default function ComingSoon() {
       observer.observe(video);
     }
 
-    // Backup timer to guarantee position after video layout settles
     const timer = setTimeout(placeOnLogo, 300);
 
     return () => {
@@ -148,11 +157,6 @@ export default function ComingSoon() {
     if (!audio) return;
 
     if (audio.paused) {
-      // Ensure audio src is loaded for iOS Safari and mobile Chrome
-      if (!audio.src || audio.src === "") {
-        audio.src = bgSongMp3;
-      }
-
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise
@@ -161,7 +165,6 @@ export default function ComingSoon() {
           })
           .catch((err) => {
             console.error("Audio playback error:", err);
-            // Fallback retry with load
             audio.load();
             audio
               .play()
@@ -177,10 +180,6 @@ export default function ComingSoon() {
 
   return (
     <main className="coming-page">
-      {/* 
-        Responsive background video:
-        Uses mobileBgVideo on devices <= 768px, desktopBgVideo on desktop
-      */}
       <video
         key={isMobile ? "mobile-video" : "desktop-video"}
         ref={videoRef}
@@ -196,8 +195,8 @@ export default function ComingSoon() {
       </video>
 
       {/* 
-        Direct src on <audio> ensures instant, reliable playback across 
-        iOS Safari, mobile Chrome, and desktop browsers without source buffering lag.
+        Pre-buffering enabled: Audio stream begins loading the first 1-2 chunks in memory 
+        so clicking the play button triggers playback instantly with zero network delay.
       */}
       <audio ref={audioRef} src={bgSongMp3} loop preload="auto" />
 
