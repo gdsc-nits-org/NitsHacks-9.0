@@ -16,10 +16,13 @@ export default function ComingSoon() {
   const videoRef = useRef(null);
   const buttonRef = useRef(null);
 
-  // Device detection to load only ONE video
+  // Device detection to load the right video immediately
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== "undefined") {
-      return window.innerWidth <= 768;
+      return (
+        window.innerWidth <= 768 ||
+        (window.matchMedia && window.matchMedia("(max-width: 768px)").matches)
+      );
     }
     return false;
   });
@@ -89,11 +92,13 @@ export default function ComingSoon() {
   }, [isMobile]);
 
   useEffect(() => {
-    placeOnLogo();
-    window.addEventListener("resize", placeOnLogo);
-
     const video = videoRef.current;
+    placeOnLogo();
+
+    window.addEventListener("resize", placeOnLogo);
     video?.addEventListener("loadedmetadata", placeOnLogo);
+    video?.addEventListener("loadeddata", placeOnLogo);
+    video?.addEventListener("canplay", placeOnLogo);
 
     const observer =
       typeof ResizeObserver !== "undefined"
@@ -104,9 +109,15 @@ export default function ComingSoon() {
       observer.observe(video);
     }
 
+    // Backup timer to guarantee position after video layout settles
+    const timer = setTimeout(placeOnLogo, 300);
+
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("resize", placeOnLogo);
       video?.removeEventListener("loadedmetadata", placeOnLogo);
+      video?.removeEventListener("loadeddata", placeOnLogo);
+      video?.removeEventListener("canplay", placeOnLogo);
       observer?.disconnect();
     };
   }, [placeOnLogo]);
@@ -137,12 +148,27 @@ export default function ComingSoon() {
     if (!audio) return;
 
     if (audio.paused) {
-      audio
-        .play()
-        .then(() => {
-          setPlayback(true);
-        })
-        .catch(() => {});
+      // Ensure audio src is loaded for iOS Safari and mobile Chrome
+      if (!audio.src || audio.src === "") {
+        audio.src = bgSongMp3;
+      }
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setPlayback(true);
+          })
+          .catch((err) => {
+            console.error("Audio playback error:", err);
+            // Fallback retry with load
+            audio.load();
+            audio
+              .play()
+              .then(() => setPlayback(true))
+              .catch(() => {});
+          });
+      }
     } else {
       audio.pause();
       setPlayback(false);
@@ -152,8 +178,8 @@ export default function ComingSoon() {
   return (
     <main className="coming-page">
       {/* 
-        Only the active video is in the DOM. 
-        Saves 3-5 MB from being downloaded unnecessarily!
+        Responsive background video:
+        Uses mobileBgVideo on devices <= 768px, desktopBgVideo on desktop
       */}
       <video
         key={isMobile ? "mobile-video" : "desktop-video"}
@@ -170,11 +196,10 @@ export default function ComingSoon() {
       </video>
 
       {/* 
-        preload="none": Won't download 5MB of audio until the user clicks Play!
+        Direct src on <audio> ensures instant, reliable playback across 
+        iOS Safari, mobile Chrome, and desktop browsers without source buffering lag.
       */}
-      <audio ref={audioRef} loop preload="none">
-        <source src={bgSongMp3} type="audio/mpeg" />
-      </audio>
+      <audio ref={audioRef} src={bgSongMp3} loop preload="auto" />
 
       <div className="image-vignette" aria-hidden="true" />
 
