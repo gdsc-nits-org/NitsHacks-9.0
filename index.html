@@ -2,7 +2,17 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Preload the 32 px favicon so the browser tab icon appears instantly -->
+    <link rel="preload" as="image" href="/favicon-32.png" fetchpriority="high" />
+    <!-- Favicon set: sharp-compressed, correct sizes (16 → 512 px) -->
+    <link rel="icon" type="image/png" sizes="16x16"  href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32"  href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48"  href="/favicon-48.png" />
+    <!-- Android / PWA -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <!-- iOS home-screen shortcut -->
+    <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NitsHacks 9.0</title>
     <!-- Google Fonts: Bangers, Bebas Neue, Luckiest Guy, Comic Neue, Montserrat, Orbitron, Plus Jakarta Sans -->
