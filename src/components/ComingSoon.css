@@ -242,6 +242,13 @@ button {
   }
 }
 
+/* Mobile Devices (max-width: 768px) — hide header logo since mobile video has it baked in */
+@media (max-width: 768px) {
+  .top-brand {
+    display: none;
+  }
+}
+
 /* Mobile Devices (max-width: 640px) */
 @media (max-width: 640px) {
   .image-vignette {
