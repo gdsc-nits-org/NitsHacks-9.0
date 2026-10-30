@@ -7,14 +7,29 @@ import bgSongMp3 from "../assets/comingSoon/gone-gone-gone.mp3";
 import logoImg from "../assets/comingSoon/nitshacks-logo.png";
 import playButtonBg from "../assets/comingSoon/comingSoon_playButton_bg.webp";
 
+// ─── MODULE-LEVEL: start fetching the audio file IMMEDIATELY when the JS
+//     bundle is parsed — before React mounts, before the first render.
+//     We also kick off a pre-decode so the Web Audio API has raw PCM
+//     ready the moment the user clicks play (zero decode lag). ────────────────
+const _audioFetchPromise = fetch(bgSongMp3).catch(() => null);
+
 // Watermark sparkle position in background videos (fractions of frame dimensions)
 const DESKTOP_LOGO = { x: 1160 / 1280, y: 600 / 720, radius: 26 / 1280 };
 const MOBILE_LOGO = { x: 650 / 720, y: 1205 / 1280, radius: 28 / 720 };
 
 export default function ComingSoon() {
-  const audioRef = useRef(null);
-  const videoRef = useRef(null);
+  const videoRef  = useRef(null);
   const buttonRef = useRef(null);
+
+  // ── Web Audio API refs ──────────────────────────────────────────────────────
+  const audioCtxRef     = useRef(null); // AudioContext
+  const decodedBufRef   = useRef(null); // Pre-decoded PCM AudioBuffer
+  const sourceNodeRef   = useRef(null); // Currently playing BufferSourceNode
+  const startTimeRef    = useRef(0);    // ctx.currentTime when last play() called
+  const pauseOffsetRef  = useRef(0);    // accumulated playback position in seconds
+
+  // ── Fallback HTMLAudioElement (used only if Web Audio API unavailable) ──────
+  const fallbackAudioRef = useRef(null);
 
   // Device detection to load the right video immediately
   const [isMobile, setIsMobile] = useState(() => {
@@ -36,29 +51,89 @@ export default function ComingSoon() {
     isPlayingRef.current = playing;
   };
 
-  // Aggressive pre-buffer: fetch the audio file into the browser cache immediately
-  // on mount so the audio element can decode from cache instead of the network.
-  // This runs in parallel with the <audio> element's own preload="auto" load.
+  // ── Pre-decode audio using Web Audio API ────────────────────────────────────
+  // The module-level fetch() already started downloading the file.
+  // Here we grab that same response (from cache / in-flight) and decode it
+  // into raw PCM. By the time the user clicks play the AudioBuffer is ready.
   useEffect(() => {
-    const audio = audioRef.current;
+    let ctx;
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch {
+      // Web Audio API unavailable — fallback audio element will handle playback
+      return;
+    }
+    audioCtxRef.current = ctx;
+
+    _audioFetchPromise
+      .then((res) => (res ? res.clone().arrayBuffer() : null))
+      .then((buf) => buf && ctx.decodeAudioData(buf))
+      .then((decoded) => {
+        if (decoded) decodedBufRef.current = decoded;
+      })
+      .catch(() => {});
+
+    return () => {
+      // Stop any playing source before unmounting
+      try { sourceNodeRef.current?.stop(); } catch {}
+      ctx.close().catch(() => {});
+    };
+  }, []);
+
+  // ── Fallback: HTMLAudioElement for browsers without Web Audio API ───────────
+  useEffect(() => {
+    const audio = fallbackAudioRef.current;
     if (!audio) return;
-
-    // 1. Tell the audio element to start buffering right away
-    audio.src = bgSongMp3;
+    audio.src  = bgSongMp3;
+    audio.loop = true;
     audio.load();
+  }, []);
 
-    // 2. Also fetch the file directly into the HTTP cache so the browser
-    //    has the full file buffered before the user even clicks play.
-    fetch(bgSongMp3, { priority: 'high' })
-      .then(res => res.arrayBuffer())   // pull into memory / cache
-      .catch(() => {})                  // silently ignore (e.g. offline)
+  // ── Tab visibility: pause / resume ─────────────────────────────────────────
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const ctx = audioCtxRef.current;
+      if (!ctx) {
+        // Fallback path
+        const audio = fallbackAudioRef.current;
+        if (!audio) return;
+        if (document.hidden) audio.pause();
+        else if (isPlayingRef.current) audio.play().catch(() => {});
+        return;
+      }
+      if (document.hidden) {
+        // Suspend AudioContext to save CPU
+        sourceNodeRef.current?.stop();
+        sourceNodeRef.current = null;
+        if (isPlayingRef.current) {
+          pauseOffsetRef.current += ctx.currentTime - startTimeRef.current;
+        }
+        ctx.suspend().catch(() => {});
+      } else if (isPlayingRef.current) {
+        ctx.resume().then(() => {
+          if (!decodedBufRef.current || !isPlayingRef.current) return;
+          const source = ctx.createBufferSource();
+          source.buffer = decodedBufRef.current;
+          source.loop   = true;
+          source.connect(ctx.destination);
+          source.start(0, pauseOffsetRef.current % decodedBufRef.current.duration);
+          startTimeRef.current = ctx.currentTime;
+          sourceNodeRef.current = source;
+        }).catch(() => {});
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      // Clean up on unmount
+      try { sourceNodeRef.current?.stop(); } catch {}
+      fallbackAudioRef.current?.pause();
+    };
   }, []);
 
   // Screen resize detection
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -92,15 +167,12 @@ export default function ComingSoon() {
       cy + radius > 0 &&
       cy - radius < ch;
 
-    if (!visible) {
-      setSpot(null);
-      return;
-    }
+    if (!visible) { setSpot(null); return; }
 
     const cover = 2 * radius + 14;
-    const base = isMobile ? 54 : Math.min(76, Math.max(54, cw * 0.052));
-    const size = Math.max(base, cover);
-    const pad = 8;
+    const base  = isMobile ? 54 : Math.min(76, Math.max(54, cw * 0.052));
+    const size  = Math.max(base, cover);
+    const pad   = 8;
 
     setSpot({
       x: Math.min(Math.max(cx, size / 2 + pad), cw - size / 2 - pad),
@@ -122,10 +194,7 @@ export default function ComingSoon() {
       typeof ResizeObserver !== "undefined"
         ? new ResizeObserver(placeOnLogo)
         : null;
-
-    if (observer && video) {
-      observer.observe(video);
-    }
+    if (observer && video) observer.observe(video);
 
     const timer = setTimeout(placeOnLogo, 300);
 
@@ -139,47 +208,46 @@ export default function ComingSoon() {
     };
   }, [placeOnLogo]);
 
-  // Handle tab switching: pause on hidden, resume when active
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        audio.pause();
-      } else if (isPlayingRef.current) {
-        audio.play().catch(() => {});
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      audio.pause();
-    };
-  }, []);
-
+  // ── Toggle play / pause ─────────────────────────────────────────────────────
   const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const ctx     = audioCtxRef.current;
+    const decoded = decodedBufRef.current;
 
+    // ── Web Audio API path (pre-decoded PCM → truly instant) ─────────────────
+    if (ctx && decoded) {
+      ctx.resume().then(() => {
+        if (!isPlayingRef.current) {
+          // Play: create source node from pre-decoded buffer — zero decode lag
+          const source = ctx.createBufferSource();
+          source.buffer = decoded;
+          source.loop   = true;
+          source.connect(ctx.destination);
+          source.start(0, pauseOffsetRef.current % decoded.duration);
+          startTimeRef.current  = ctx.currentTime;
+          sourceNodeRef.current = source;
+          setPlayback(true);
+        } else {
+          // Pause: record position so resume continues from same point
+          pauseOffsetRef.current += ctx.currentTime - startTimeRef.current;
+          try { sourceNodeRef.current?.stop(); } catch {}
+          sourceNodeRef.current = null;
+          setPlayback(false);
+        }
+      }).catch(() => {});
+      return;
+    }
+
+    // ── Fallback: HTMLAudioElement (Web Audio API unavailable) ───────────────
+    const audio = fallbackAudioRef.current;
+    if (!audio) return;
     if (audio.paused) {
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setPlayback(true);
-          })
-          .catch((err) => {
-            console.error("Audio playback error:", err);
-            audio.load();
-            audio
-              .play()
-              .then(() => setPlayback(true))
-              .catch(() => {});
-          });
-      }
+      audio.play()
+        .then(() => setPlayback(true))
+        .catch((err) => {
+          console.error("Audio playback error:", err);
+          audio.load();
+          audio.play().then(() => setPlayback(true)).catch(() => {});
+        });
     } else {
       audio.pause();
       setPlayback(false);
@@ -202,8 +270,9 @@ export default function ComingSoon() {
         <source src={isMobile ? mobileBgVideo : desktopBgVideo} type="video/mp4" />
       </video>
 
-      {/* Pre-buffering: file is fetched eagerly into cache on mount (see useEffect above). */}
-      <audio ref={audioRef} src={bgSongMp3} loop preload="auto" />
+      {/* Hidden fallback audio element — only used if Web Audio API is unavailable */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio ref={fallbackAudioRef} loop preload="auto" style={{ display: "none" }} />
 
       <div className="image-vignette" aria-hidden="true" />
 
