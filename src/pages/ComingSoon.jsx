@@ -3,7 +3,7 @@ import "../components/ComingSoon.css";
 
 import desktopBgVideo from "../assets/comingSoon/coming-soon-background.mp4";
 import mobileBgVideo from "../assets/comingSoon/coming-soon-background-mobile.mp4";
-import bgSongMp3 from "../assets/comingSoon/background-song.mp3";
+import bgSongMp3 from "../assets/comingSoon/gone-gone-gone.mp3";
 import logoImg from "../assets/comingSoon/nitshacks-logo.png";
 import playButtonBg from "../assets/comingSoon/comingSoon_playButton_bg.webp";
 
@@ -36,14 +36,22 @@ export default function ComingSoon() {
     isPlayingRef.current = playing;
   };
 
-  // Pre-buffer audio immediately on page load so click playback is instant (0ms latency)
+  // Aggressive pre-buffer: fetch the audio file into the browser cache immediately
+  // on mount so the audio element can decode from cache instead of the network.
+  // This runs in parallel with the <audio> element's own preload="auto" load.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Explicitly prime the browser audio buffer
+    // 1. Tell the audio element to start buffering right away
     audio.src = bgSongMp3;
     audio.load();
+
+    // 2. Also fetch the file directly into the HTTP cache so the browser
+    //    has the full file buffered before the user even clicks play.
+    fetch(bgSongMp3, { priority: 'high' })
+      .then(res => res.arrayBuffer())   // pull into memory / cache
+      .catch(() => {})                  // silently ignore (e.g. offline)
   }, []);
 
   // Screen resize detection
@@ -194,10 +202,7 @@ export default function ComingSoon() {
         <source src={isMobile ? mobileBgVideo : desktopBgVideo} type="video/mp4" />
       </video>
 
-      {/* 
-        Pre-buffering enabled: Audio stream begins loading the first 1-2 chunks in memory 
-        so clicking the play button triggers playback instantly with zero network delay.
-      */}
+      {/* Pre-buffering: file is fetched eagerly into cache on mount (see useEffect above). */}
       <audio ref={audioRef} src={bgSongMp3} loop preload="auto" />
 
       <div className="image-vignette" aria-hidden="true" />
