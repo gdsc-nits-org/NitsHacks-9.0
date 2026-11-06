@@ -21,13 +21,11 @@ export default function HeroSection() {
     const handleMouseMove = (e) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      // Normalized coordinates (-1 to +1 from screen center)
       const normX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const normY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
 
-      // Realistic flight steering deflection
-      mouseRef.current.targetX = normX * 8; // Subtle forward/back acceleration
-      mouseRef.current.targetY = normY * 7; // Gentle banking altitude change
+      mouseRef.current.targetX = normX * 8;
+      mouseRef.current.targetY = normY * 7;
     };
 
     const handleMouseLeave = () => {
@@ -38,32 +36,23 @@ export default function HeroSection() {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseleave', handleMouseLeave);
 
-    let startTime = performance.now();
+    const startTime = performance.now();
 
-    // 60fps/120fps physics loop: multi-harmonic powered flight oscillation + cursor steering
     const updateFlight = (now) => {
       const t = (now - startTime) * 0.001;
 
-      // Smooth cursor steering interpolation (lerp 0.06)
       mouseRef.current.currentX +=
         (mouseRef.current.targetX - mouseRef.current.currentX) * 0.06;
       mouseRef.current.currentY +=
         (mouseRef.current.targetY - mouseRef.current.currentY) * 0.06;
 
-      // Multi-layered aerodynamic flight physics:
-      // 1. Primary lift bobbing: ~3.5px vertical cycle
       const lift = Math.sin(t * 2.2) * 3.5;
-      // 2. High-frequency thruster turbulence surge: ~1.5px
       const surge = Math.cos(t * 4.6) * 1.5;
-      // 3. Dynamic banking pitch tilt: steers into movement
       const banking = Math.sin(t * 2.2) * 1.2 + (mouseRef.current.currentY / 7) * 2.0;
 
-      const posX = mouseRef.current.currentX + surge;
-      const posY = mouseRef.current.currentY + lift;
-
       setFlightState({
-        x: posX,
-        y: posY,
+        x: mouseRef.current.currentX + surge,
+        y: mouseRef.current.currentY + lift,
         rot: banking,
       });
 
@@ -82,7 +71,7 @@ export default function HeroSection() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full h-[100svh] min-h-[520px] overflow-hidden bg-[#8c0003] flex flex-col justify-between select-none"
+      className="relative w-full h-screen overflow-hidden bg-[#8c0003] flex flex-col justify-between select-none"
       style={{
         backgroundImage: "url('/hero/comic_dots_bg.png')",
         backgroundRepeat: 'repeat',
@@ -122,7 +111,7 @@ export default function HeroSection() {
         <Navbar activeRoute="/" />
       </header>
 
-      {/* 2. Main Stage: Vector SVG Scene (Locked to 1024x539 coordinate space) */}
+      {/* 2. Main Stage: Vector SVG Scene (1024x539 coordinate space) */}
       <div className="relative z-10 flex-1 w-full max-w-[1920px] mx-auto flex items-center justify-center overflow-hidden">
         <div className="relative w-full h-full max-h-[100svh] aspect-[1024/539] flex items-center justify-center">
           <svg
@@ -132,7 +121,6 @@ export default function HeroSection() {
             aria-label="NITS HACKS 9.0 Hero Section"
           >
             <defs>
-              {/* Thruster flame glow filter */}
               <filter id="flame-glow" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="2" result="blur" />
                 <feMerge>
@@ -142,7 +130,7 @@ export default function HeroSection() {
               </filter>
             </defs>
 
-            {/* A. City Skyline along the bottom with transparent sky showing uniform texture */}
+            {/* A. City Skyline along the bottom */}
             <image
               href="/hero/city_skyline.png"
               x="0"
@@ -165,10 +153,8 @@ export default function HeroSection() {
 
             {/* C. Stark / Avengers Tower on the Left */}
             <g className="avengers-tower">
-              {/* Main Tower Architectural Body */}
               <path d={TOWER_PATH} fill="#0d0d0d" />
 
-              {/* Diagonal Metallic Edge Bevel */}
               <line
                 x1="125"
                 y1="280"
@@ -180,13 +166,10 @@ export default function HeroSection() {
                 opacity="0.7"
               />
 
-              {/* Cantilevered Landing Platform */}
               <polygon points="120,250 240,250 270,256 120,256" fill="#080808" />
               <line x1="120" y1="256" x2="270" y2="256" stroke="#222222" strokeWidth="1.5" />
 
-              {/* Complete, Full Avengers Logo & Dual Speedlines on the Tower */}
               <g className="avengers-logo-complete" fill="#ffffff">
-                {/* Complete 360-degree Circular Ring (Outer R=21, Inner r=16.5) */}
                 <circle
                   cx="105.5"
                   cy="273.5"
@@ -196,16 +179,10 @@ export default function HeroSection() {
                   strokeWidth="4.5"
                 />
 
-                {/* Letter A: Left Leg */}
                 <polygon points="107,248 111,248 99,292 94,292" fill="#ffffff" />
-
-                {/* Letter A: Right Leg & Lower Arrow Foot */}
                 <polygon points="107,248 111,248 122,289 126,293.5 120,293.5 114,289 110,270" fill="#ffffff" />
-
-                {/* Letter A: Arrow Crossbar */}
                 <polygon points="96,275.5 124,275.5 124,273.5 129,277 124,280.5 124,278.5 96,278.5" fill="#ffffff" />
 
-                {/* Upper Speedline shooting across Stark Tower balcony */}
                 <line
                   x1="127"
                   y1="277"
@@ -216,7 +193,6 @@ export default function HeroSection() {
                   strokeLinecap="round"
                 />
 
-                {/* Lower Speedline shooting across Stark Tower base */}
                 <line
                   x1="106"
                   y1="292.5"
@@ -229,7 +205,7 @@ export default function HeroSection() {
               </g>
             </g>
 
-            {/* D. Iron Man Supersonic Flight Unit (Animated Flight Bobbing, Turbulence & Thruster Propulsion) */}
+            {/* D. Iron Man Supersonic Flight Unit */}
             <g
               className="ironman-flying-unit pointer-events-none"
               style={{
@@ -238,13 +214,11 @@ export default function HeroSection() {
                 willChange: 'transform',
               }}
             >
-              {/* Pulsating Thruster Rocket Exhaust Flame at boots origin */}
               <g className="animate-flame" filter="url(#flame-glow)">
                 <ellipse cx="236" cy="116" rx="8" ry="3.5" fill="#ffffff" opacity="0.95" />
                 <ellipse cx="232" cy="116" rx="14" ry="5" fill="#38bdf8" opacity="0.35" />
               </g>
 
-              {/* Streaming Supersonic Thruster Speedlines (Anchored firmly to boots, trailing to horizon) */}
               <g className="speed-lines opacity-95">
                 {SPEED_LINES_DATA.map((line) => (
                   <line
@@ -266,27 +240,10 @@ export default function HeroSection() {
                 ))}
               </g>
 
-              {/* Iron Man Character Body */}
               <g className="ironman-body">
-                {/* Silhouette Body */}
-                <path
-                  d={IRONMAN_PATH}
-                  fill="#0d0d0d"
-                />
-
-                {/* Steady Helmet Eye Slit */}
-                <polygon
-                  points="171,136 175,138 173,139 170,137"
-                  fill="#ffffff"
-                />
-
-                {/* Steady Chest Arc Reactor (Clean White Light) */}
-                <circle
-                  cx="211"
-                  cy="166"
-                  r="3.2"
-                  fill="#ffffff"
-                />
+                <path d={IRONMAN_PATH} fill="#0d0d0d" />
+                <polygon points="171,136 175,138 173,139 170,137" fill="#ffffff" />
+                <circle cx="211" cy="166" r="3.2" fill="#ffffff" />
               </g>
             </g>
           </svg>

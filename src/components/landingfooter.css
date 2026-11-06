@@ -1,0 +1,279 @@
+
+/*
+  Footer layout: 1920 x 1080 design canvas.
+  1 design pixel = var(--u).
+*/
+
+/* ---- Main Footer ---- */
+.ft {
+  --u: calc(100vw / 1920);
+
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1920 / 1080;
+  overflow: hidden;
+  background: #ffffff;
+  isolation: isolate;
+}
+
+/* Use container-relative scaling when supported */
+@supports (container-type: inline-size) {
+  .ft {
+    container-type: inline-size;
+    --u: calc(100cqw / 1920);
+  }
+}
+
+/* ---- Global Image Rules ---- */
+.ft img {
+  display: block;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* ---- Backgrounds ---- */
+.ft-manga {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background-size: cover;
+  background-position: center;
+
+  filter: grayscale(1) contrast(.9);
+  opacity: .2;
+}
+
+.ft-dots {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  background-size: cover;
+  background-position: center;
+
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* ---- Artwork ---- */
+.ft-emblem {
+  position: absolute;
+  z-index: 2;
+  left: calc(862 * var(--u));
+  top: calc(62 * var(--u));
+  width: calc(198 * var(--u));
+}
+
+.ft-wordmark {
+  position: absolute;
+  z-index: 2;
+  left: calc(697 * var(--u));
+  top: calc(383 * var(--u));
+  width: calc(526 * var(--u));
+}
+
+.ft-strip {
+  position: absolute;
+  z-index: 2;
+  left: calc(73 * var(--u));
+  top: calc(352 * var(--u));
+  width: calc(1792 * var(--u));
+}
+
+.ft-badge {
+  position: absolute;
+  z-index: 3;
+  left: calc(93 * var(--u));
+  top: calc(356 * var(--u));
+  width: calc(80 * var(--u));
+}
+
+/* ---- Live Map ---- */
+.ft-map {
+  position: absolute;
+  z-index: 4;
+
+  left: calc(1483 * var(--u));
+  top: calc(387 * var(--u));
+
+  width: calc(366 * var(--u));
+  height: calc(241 * var(--u));
+
+  border-radius: calc(16 * var(--u));
+  overflow: hidden;
+
+  background: #1f2937;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+
+.ft-map iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+
+  filter: invert(90%) hue-rotate(180deg) contrast(.9);
+}
+
+/* ---- Clickable Areas ---- */
+.ft-hit {
+  position: absolute;
+  z-index: 5;
+  display: block;
+  text-decoration: none;
+}
+
+/* Visit Website */
+.ft-visit {
+  left: calc(95 * var(--u));
+  top: calc(370 * var(--u));
+  width: calc(427 * var(--u));
+  height: calc(75 * var(--u));
+  border-radius: calc(6 * var(--u));
+}
+
+/* Social Media */
+.ft-ig {
+  left: calc(117 * var(--u));
+  top: calc(563 * var(--u));
+  width: calc(48 * var(--u));
+  height: calc(48 * var(--u));
+}
+
+.ft-in {
+  left: calc(220 * var(--u));
+  top: calc(563 * var(--u));
+  width: calc(48 * var(--u));
+  height: calc(48 * var(--u));
+}
+
+.ft-fb {
+  left: calc(322 * var(--u));
+  top: calc(563 * var(--u));
+  width: calc(48 * var(--u));
+  height: calc(48 * var(--u));
+}
+
+.ft-x {
+  left: calc(425 * var(--u));
+  top: calc(563 * var(--u));
+  width: calc(48 * var(--u));
+  height: calc(48 * var(--u));
+}
+
+/* Email */
+.ft-email {
+  left: calc(110 * var(--u));
+  top: calc(632 * var(--u));
+  width: calc(372 * var(--u));
+  height: calc(38 * var(--u));
+}
+
+/* ---- Hover Effects ---- */
+.ft-visit,
+.ft-ig,
+.ft-in,
+.ft-fb,
+.ft-x,
+.ft-email {
+  transition:
+    transform .15s ease,
+    filter .15s ease;
+}
+
+.ft-visit:hover {
+  filter: brightness(1.05);
+  transform: translateY(calc(-2 * var(--u)));
+}
+
+.ft-ig:hover,
+.ft-in:hover,
+.ft-fb:hover,
+.ft-x:hover {
+  transform: translateY(calc(-4 * var(--u))) scale(1.08);
+}
+
+/* ---- Map Open Chip ---- */
+.ft-map-open {
+  position: absolute;
+  z-index: 6;
+
+  left: calc(1483 * var(--u));
+  top: calc(597 * var(--u));
+
+  padding:
+    calc(3 * var(--u))
+    calc(10 * var(--u));
+
+  font-family: "Outfit", system-ui, sans-serif;
+  font-size: calc(14 * var(--u));
+  font-weight: 500;
+  line-height: 1.4;
+
+  color: #ffffff;
+  background: rgba(0, 0, 0, .65);
+
+  border-radius:
+    0
+    calc(10 * var(--u))
+    0
+    calc(16 * var(--u));
+
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity .2s ease;
+}
+
+.ft-map:hover + .ft-map-open,
+.ft-map-open:focus,
+.ft-map-open:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---- Skyline ---- */
+.ft-skyline {
+  position: absolute;
+  z-index: 2;
+
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: calc(180 * var(--u));
+
+  pointer-events: none;
+}
+
+/* ---- Accessibility ---- */
+.ft-hit:focus-visible,
+.ft-map-open:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+/* ---- Mobile Layout ---- */
+@media (max-width: 700px) {
+  .ft {
+    min-width: 700px;
+  }
+}
+
+/* ---- Reduced Motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .ft-visit,
+  .ft-ig,
+  .ft-in,
+  .ft-fb,
+  .ft-x,
+  .ft-email,
+  .ft-map-open {
+    transition: none;
+  }
+}
