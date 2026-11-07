@@ -78,7 +78,7 @@ export default function AboutSection() {
         {/* Top-left: stacked title */}
         <div className="stack stack--title about-title">
           <h2 className="stack__face about-title__text">
-            about <em>NITSHACKS</em>
+            about <em>NITSHACKS-9.0</em>
           </h2>
         </div>
 

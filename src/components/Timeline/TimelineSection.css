@@ -1,0 +1,388 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   TVA Retro Monitor Timeline Section — Styles
+   Exact High-Brightness Marvel / Loki / Miss Minutes CRT Terminal
+════════════════════════════════════════════════════════════════════════════ */
+
+.tva-timeline-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 70px 20px 90px;
+  background: radial-gradient(circle at 50% 25%, #1f1105 0%, #0d0602 60%, #020100 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+}
+
+/* Radiant ambient golden phosphor glow */
+.tva-timeline-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1100px;
+  height: 650px;
+  background: radial-gradient(ellipse at center, rgba(255, 175, 40, 0.14) 0%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── CRT Monitor Outer Frame ─── */
+.tva-crt-screen {
+  position: relative;
+  width: 100%;
+  max-width: 1160px;
+  background: #190f05;
+  border-radius: 18px;
+  padding: 16px 20px 22px;
+  border: 1px solid rgba(255, 185, 55, 0.55);
+  box-shadow:
+    0 0 35px rgba(255, 160, 30, 0.28),
+    0 0 70px rgba(255, 130, 10, 0.12),
+    0 30px 80px rgba(0, 0, 0, 0.98),
+    inset 0 0 90px rgba(0, 0, 0, 0.88);
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* CRT Scanlines Overlay */
+.tva-crt-scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(255, 230, 160, 0.02) 50%,
+    rgba(0, 0, 0, 0.28) 50%
+  );
+  background-size: 100% 3px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.5;
+}
+
+/* CRT Screen Vignette / Tube Curvature */
+.tva-crt-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 180, 50, 0.04) 45%,
+    rgba(25, 12, 3, 0.25) 75%,
+    rgba(4, 2, 0, 0.82) 100%
+  );
+  box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 11;
+  border-radius: 16px;
+}
+
+/* Glass Glare Highlight */
+.tva-crt-glare {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 245, 205, 0.07) 0%,
+    rgba(255, 245, 205, 0.02) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* ─── Top Header Bar (High Brightness) ─── */
+.tva-header-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 28px;
+  border: 2px solid #e5a435;
+  box-shadow:
+    0 0 16px rgba(229, 164, 53, 0.55),
+    inset 0 0 14px rgba(229, 164, 53, 0.18);
+  background: rgba(26, 14, 4, 0.92);
+  margin-bottom: 18px;
+  z-index: 5;
+}
+
+.tva-header-title {
+  font-family: 'Playfair Display', 'Cinzel', 'Georgia', serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #ffea2e;
+  text-shadow:
+    0 0 8px #ffea2e,
+    0 0 18px #ffc800,
+    0 0 35px rgba(255, 180, 0, 0.75);
+  letter-spacing: 0.05em;
+  text-transform: capitalize;
+}
+
+.tva-header-brand {
+  font-family: 'Playfair Display', 'Cinzel', 'Georgia', serif;
+  font-size: 1.95rem;
+  font-weight: 900;
+  color: #ffea2e;
+  text-shadow:
+    0 0 8px #ffea2e,
+    0 0 20px #ffc800,
+    0 0 40px rgba(255, 180, 0, 0.8);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.tva-header-marvel {
+  font-family: 'Playfair Display', 'Cinzel', 'Georgia', serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #ffea2e;
+  text-shadow:
+    0 0 8px #ffea2e,
+    0 0 18px #ffc800,
+    0 0 35px rgba(255, 180, 0, 0.75);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ─── Main Grid Layout ─── */
+.tva-main-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  width: 100%;
+  position: relative;
+  z-index: 5;
+}
+
+/* ─── Left Panel: Miss Minutes + Equalizer ─── */
+.tva-left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Miss Minutes Display Box */
+.tva-clock-frame {
+  position: relative;
+  width: 100%;
+  height: 255px;
+  border: 1.5px solid #d49a30;
+  background: radial-gradient(circle at 50% 48%, #36200a 0%, #1c0e04 75%, #100701 100%);
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.92),
+    0 0 15px rgba(212, 154, 48, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.tva-clock-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 20px rgba(255, 190, 50, 0.12);
+  pointer-events: none;
+}
+
+/* ─── Horizontal Equalizer / Telemetry Bars ─── */
+.tva-equalizer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 7.5px;
+  width: 100%;
+  padding: 4px 2px;
+}
+
+.tva-eq-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Circular status dot */
+.tva-eq-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff0aa;
+  box-shadow:
+    0 0 8px rgba(255, 240, 170, 0.95),
+    0 0 14px rgba(255, 190, 60, 0.6);
+  flex-shrink: 0;
+}
+
+/* Pill track */
+.tva-eq-track {
+  position: relative;
+  flex: 1;
+  height: 12px;
+  background: #241404;
+  border: 1.3px solid #b87e24;
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 5px rgba(0, 0, 0, 0.85),
+    0 0 6px rgba(184, 126, 36, 0.3);
+}
+
+/* Filled luminous cream-gold bar */
+.tva-eq-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffdc69 0%, #fff0ad 80%, #ffffff 100%);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 10px rgba(255, 230, 130, 0.85),
+    0 0 18px rgba(255, 190, 50, 0.5);
+  transition: width 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Right Panel: Map Frame ─── */
+.tva-map-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 550;
+  min-height: 340px;
+  border: 2.5px solid #e5a435;
+  box-shadow:
+    0 0 18px rgba(229, 164, 53, 0.45),
+    0 0 35px rgba(229, 140, 20, 0.2),
+    inset 0 0 45px rgba(0, 0, 0, 0.92);
+  background: #180d04;
+  overflow: hidden;
+}
+
+/* Map background layer SVG */
+.tva-map-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ─── SVG Day Badges Interactive Styling ─── */
+.tva-svg-day-badge {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tva-svg-day-badge:hover {
+  filter: drop-shadow(0 0 10px rgba(255, 60, 60, 0.9));
+}
+
+/* ─── Active Event Status Card Below Map ─── */
+.tva-event-status-bar {
+  margin-top: 14px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: rgba(22, 12, 3, 0.95);
+  border: 1.5px solid #e5a435;
+  border-left: 4px solid #ff3838;
+  box-shadow:
+    0 0 14px rgba(229, 164, 53, 0.35),
+    0 6px 20px rgba(0, 0, 0, 0.85);
+  z-index: 5;
+}
+
+.tva-status-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ff4747;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 8px rgba(255, 71, 71, 0.7);
+  white-space: nowrap;
+}
+
+.tva-status-title {
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f7e599;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 8px rgba(247, 229, 153, 0.7);
+  white-space: nowrap;
+}
+
+.tva-status-desc {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #e2be79;
+}
+
+/* ─── Responsive Styles ─── */
+@media (max-width: 900px) {
+  .tva-main-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .tva-left-panel {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    align-items: center;
+    gap: 20px;
+  }
+  .tva-clock-frame {
+    height: 200px;
+  }
+  .tva-map-frame {
+    min-height: 290px;
+  }
+  .tva-header-title,
+  .tva-header-marvel {
+    font-size: 1.25rem;
+  }
+  .tva-header-brand {
+    font-size: 1.5rem;
+    letter-spacing: 0.15em;
+  }
+  .tva-event-status-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  .tva-timeline-wrapper {
+    padding: 35px 10px 50px;
+  }
+  .tva-crt-screen {
+    padding: 10px 12px 14px;
+    border-radius: 12px;
+  }
+  .tva-header-box {
+    padding: 8px 12px;
+  }
+  .tva-header-title,
+  .tva-header-marvel {
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+  }
+  .tva-header-brand {
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+  }
+  .tva-left-panel {
+    grid-template-columns: 1fr;
+  }
+  .tva-clock-frame {
+    height: 230px;
+  }
+  .tva-map-frame {
+    min-height: 250px;
+  }
+}
