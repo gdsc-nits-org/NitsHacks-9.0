@@ -8,9 +8,8 @@ const TIMELINE_DAYS = [
     id: 'D-1',
     date: '9TH NOV',
     badgeLabel: 'D-1',
-    eventName: 'OPENING CEREMONY',
-    subEvent: 'Inauguration, Keynote Address & Theme Reveal',
-    time: 'DAY 1 • 10:00 AM ONWARDS',
+    eventName: 'Opening Ceremony',
+    time: 'DAY 1',
     // Positioned right beside the D-1 badge along the entrance road
     markerX: 350,
     markerY: 130,
@@ -22,9 +21,8 @@ const TIMELINE_DAYS = [
     id: 'D-2',
     date: '10TH NOV',
     badgeLabel: 'D-2',
-    eventName: 'HACKATHON COMMENCES',
-    subEvent: '36-Hour Hack Begins, Mentorship Round 1 & Ideation',
-    time: 'DAY 2 • 09:00 AM ONWARDS',
+    eventName: 'Tracks, mid term and final term evaluation',
+    time: 'DAY 2',
     // Positioned right beside the D-2 badge along the entrance road
     markerX: 450,
     markerY: 410,
@@ -35,9 +33,8 @@ const TIMELINE_DAYS = [
     id: 'D-3',
     date: '11TH NOV',
     badgeLabel: 'D-3',
-    eventName: 'MENTORING ROUND',
-    subEvent: 'Progress Review with Industry Mentors & Checkpoints',
-    time: 'DAY 3 • 11:00 AM - 08:00 PM',
+    eventName: 'Closing ceremony and prize distribution',
+    time: 'DAY 3',
     // Positioned right beside the D-3 badge along the entrance road
     markerX: 665,
     markerY: 140,
@@ -48,9 +45,8 @@ const TIMELINE_DAYS = [
     id: 'D-4',
     date: '12TH NOV',
     badgeLabel: 'D-4',
-    eventName: 'FINAL SHOWDOWN',
-    subEvent: 'Code Freeze, Jury Demos, Grand Finale & Prize Gala',
-    time: 'DAY 4 • 02:00 PM - 07:00 PM',
+    eventName: 'Final Day',
+    time: 'DAY 4',
     // Positioned right beside the D-4 badge along the entrance road
     markerX: 800,
     markerY: 410,
@@ -60,7 +56,89 @@ const TIMELINE_DAYS = [
 ];
 
 // Target coordinates for NAME box top edge in SVG viewBox
-const NAME_BOX_TARGET = { x: 135, y: 468 };
+const NAME_BOX_TARGET = { x: 175, y: 442 };
+
+/**
+ * Automatically calculates which day ID the timeline marker should default to
+ * based on the current date:
+ * - 9th Nov  -> D-1
+ * - 10th Nov -> D-2
+ * - 11th Nov -> D-3
+ * - 12th Nov -> D-4
+ * Also supports URL query parameter override (?date=9..12 or ?day=D-1..D-4) for easy testing!
+ */
+export function getAutoDayId() {
+  if (typeof window !== 'undefined') {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const testDay = params.get('day');
+      if (testDay && ['D-1', 'D-2', 'D-3', 'D-4'].includes(testDay.toUpperCase())) {
+        return testDay.toUpperCase();
+      }
+      const testDate = parseInt(params.get('date'), 10);
+      if (!isNaN(testDate)) {
+        if (testDate <= 9) return 'D-1';
+        if (testDate === 10) return 'D-2';
+        if (testDate === 11) return 'D-3';
+        if (testDate >= 12) return 'D-4';
+      }
+    } catch {
+      // Ignore search param errors in non-browser envs
+    }
+  }
+
+  const now = new Date();
+  const month = now.getMonth(); // 10 is November (0 = Jan, ..., 10 = Nov)
+  const date = now.getDate();
+
+  if (month === 10) {
+    if (date <= 9) return 'D-1';
+    if (date === 10) return 'D-2';
+    if (date === 11) return 'D-3';
+    if (date >= 12) return 'D-4';
+  } else if (month < 10) {
+    // Before November -> D-1
+    return 'D-1';
+  } else {
+    // After November -> D-4
+    return 'D-4';
+  }
+
+  return 'D-1';
+}
+
+/**
+ * Returns the day ID corresponding to today's date if today is 9th, 10th, 11th, or 12th Nov
+ */
+export function getTodayDayId() {
+  if (typeof window !== 'undefined') {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const testDay = params.get('day');
+      if (testDay && ['D-1', 'D-2', 'D-3', 'D-4'].includes(testDay.toUpperCase())) {
+        return testDay.toUpperCase();
+      }
+      const testDate = parseInt(params.get('date'), 10);
+      if (testDate === 9) return 'D-1';
+      if (testDate === 10) return 'D-2';
+      if (testDate === 11) return 'D-3';
+      if (testDate === 12) return 'D-4';
+    } catch {
+      // Ignore
+    }
+  }
+
+  const now = new Date();
+  const month = now.getMonth();
+  const date = now.getDate();
+  if (month === 10) {
+    if (date === 9) return 'D-1';
+    if (date === 10) return 'D-2';
+    if (date === 11) return 'D-3';
+    if (date === 12) return 'D-4';
+  }
+  return null;
+}
 
 // ─── Exact Miss Minutes SVG Clock Illustration ───────────────────────────────
 function ExactMissMinutes() {
@@ -186,7 +264,7 @@ function ExactMissMinutes() {
           <path d="M 84 68 L 84 62" stroke="#1c1103" strokeWidth="2.4" strokeLinecap="round" />
         </g>
 
-        
+
         <g>
           <path d="M 112 71 Q 119 64 128 70" fill="none" stroke="#1c1103" strokeWidth="2.2" strokeLinecap="round" />
           <ellipse cx="120" cy="81" rx="9.5" ry="14" fill="#ffffff" stroke="#1c1103" strokeWidth="2" />
@@ -214,11 +292,25 @@ function ExactMissMinutes() {
 
 // ─── Main Timeline Section Export ────────────────────────────────────────────
 export default function TimelineSection() {
-  const [activeDayId, setActiveDayId] = useState('D-1');
+  const [activeDayId, setActiveDayId] = useState(getAutoDayId);
   const [barWidths, setBarWidths] = useState([68, 85, 52, 74]);
 
   const activeDay =
     TIMELINE_DAYS.find((d) => d.id === activeDayId) || TIMELINE_DAYS[0];
+
+  const todayDayId = getTodayDayId();
+
+  // Automatically sync marker to current date on mount & check periodically
+  useEffect(() => {
+    setActiveDayId(getAutoDayId());
+
+    // Check once every minute to see if system date rolled over to next day
+    const dateInterval = setInterval(() => {
+      setActiveDayId(getAutoDayId());
+    }, 60000);
+
+    return () => clearInterval(dateInterval);
+  }, []);
 
   // Random real-time telemetry bars below the clock
   useEffect(() => {
@@ -335,7 +427,7 @@ export default function TimelineSection() {
                 ))}
 
               </g>
-              
+
 
               {/* ─── B. Topographical Contour Elevation Lines ─── */}
               <g fill="none" stroke="#52310f" strokeWidth="1.3" opacity="0.68">
@@ -476,6 +568,7 @@ export default function TimelineSection() {
               {/* Rendered directly in SVG so they NEVER get hidden on mobile */}
               {TIMELINE_DAYS.map((ev) => {
                 const isActive = ev.id === activeDayId;
+                const isToday = ev.id === todayDayId;
                 const bx = ev.badgeX - 44;
                 const by = ev.badgeY - 22;
                 return (
@@ -512,57 +605,71 @@ export default function TimelineSection() {
                     {/* Bottom-Right */}
                     <polygon points={`${bx + 76},${by + 42} ${bx + 86},${by + 32} ${bx + 86},${by + 42}`} fill="#ff3838" />
 
-                    {/* Badge Label Text (D-1, D-2, D-3, D-4) - Larger */}
+                    {/* Badge Label Text (D-1, D-2, D-3, D-4) */}
                     <text
                       x={ev.badgeX}
-                      y={ev.badgeY + 7}
+                      y={ev.badgeY}
+                      dominantBaseline="central"
                       textAnchor="middle"
                       fill="#ff3b3b"
-                      fontSize="20"
+                      fontSize="19"
                       fontWeight="700"
                       fontFamily="'Share Tech Mono', 'Orbitron', monospace"
-                      letterSpacing="0.08em"
+                      letterSpacing="0.06em"
                       style={{ filter: 'drop-shadow(0 0 8px rgba(255, 59, 59, 0.95))' }}
                     >
                       {ev.badgeLabel}
                     </text>
 
-                    {/* Date Capsule Below Badge (High Visibility & Brightness) */}
-                    <g transform={`translate(${bx}, ${by + 48})`}>
+                    {/* Date Capsule Below Badge (Properly Sized & Centered so Content Never Overflows) */}
+                    <g transform={`translate(${ev.badgeX - 49}, ${by + 48})`}>
                       {/* Dark High-Contrast Background Capsule */}
                       <rect
                         x="0"
                         y="0"
-                        width="88"
-                        height="24"
-                        rx="4"
+                        width="98"
+                        height="28"
+                        rx="5"
                         fill="rgba(18, 8, 2, 0.96)"
-                        stroke={isActive ? '#ffea4a' : 'rgba(255, 190, 55, 0.7)'}
-                        strokeWidth="1.6"
+                        stroke={isActive ? '#ffea4a' : isToday ? '#38ef7d' : 'rgba(255, 190, 55, 0.75)'}
+                        strokeWidth={isActive ? '1.8' : isToday ? '1.6' : '1.4'}
                         style={{
                           filter: isActive
                             ? 'drop-shadow(0 0 10px rgba(255, 234, 74, 0.85))'
-                            : 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.95))',
+                            : isToday
+                              ? 'drop-shadow(0 0 8px rgba(56, 239, 125, 0.75))'
+                              : 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.95))',
                         }}
                       />
-                      {/* High-Brightness Date Text */}
+                      {/* High-Brightness Date Text - Perfectly Centered Horizontally & Vertically */}
                       <text
-                        x="44"
-                        y="17"
+                        x="49"
+                        y="14"
+                        dominantBaseline="central"
                         textAnchor="middle"
-                        fill={isActive ? '#ffffff' : '#ffea4a'}
-                        fontSize="14"
+                        fill={isActive ? '#ffffff' : isToday ? '#bbf7d0' : '#ffea4a'}
+                        fontSize="13"
                         fontWeight="800"
                         fontFamily="'Share Tech Mono', 'Orbitron', monospace"
-                        letterSpacing="0.1em"
+                        letterSpacing="0.04em"
                         style={{
                           filter: isActive
-                            ? 'drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 12px #ffea4a)'
-                            : 'drop-shadow(0 0 5px rgba(255, 234, 74, 0.85))',
+                            ? 'drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 10px #ffea4a)'
+                            : isToday
+                              ? 'drop-shadow(0 0 6px #38ef7d)'
+                              : 'drop-shadow(0 0 5px rgba(255, 234, 74, 0.85))',
                         }}
                       >
                         {ev.date}
                       </text>
+
+                      {/* Small Live indicator pulse on corner if today */}
+                      {isToday && (
+                        <g transform="translate(90, 7)">
+                          <circle cx="0" cy="0" r="3" fill="#22c55e" />
+                          <circle cx="0" cy="0" r="5.5" fill="none" stroke="#22c55e" strokeWidth="1" className="animate-ping" />
+                        </g>
+                      )}
                     </g>
 
                     {/* Active Ping Radar Indicator */}
@@ -581,8 +688,8 @@ export default function TimelineSection() {
                 );
               })}
 
-              {/* ─── H. NAME Box (Exact Rectangle from Screenshot) ─── */}
-              {/* Positioned at x=45, y=468 in SVG viewBox so it NEVER overlaps D-1 or D-2 */}
+              {/* ─── H. NAME Box (TVA Event Box Inside Map) ─── */}
+              {/* Positioned at x=35, y=442, width=280, height=72 in SVG viewBox */}
               <g
                 className="cursor-pointer"
                 onClick={() => {
@@ -593,38 +700,58 @@ export default function TimelineSection() {
               >
                 {/* Yellow Outer Border Box */}
                 <rect
-                  x="45"
-                  y="468"
-                  width="180"
-                  height="46"
-                  rx="2"
+                  x="35"
+                  y="442"
+                  width="280"
+                  height="72"
+                  rx="6"
                   fill="rgba(24, 13, 3, 0.96)"
                   stroke="#e5a435"
                   strokeWidth="2.2"
                   style={{ filter: 'drop-shadow(0 0 10px rgba(229, 164, 53, 0.5))' }}
                 />
 
-                {/* Event Name Text Inside Box */}
-                <text
-                  x="135"
-                  y="498"
-                  textAnchor="middle"
-                  fill="#f7e599"
-                  fontSize="17"
-                  fontWeight="700"
-                  fontFamily="'VT323', 'Share Tech Mono', monospace"
-                  letterSpacing="0.12em"
-                  style={{ filter: 'drop-shadow(0 0 8px rgba(247, 229, 153, 0.75))' }}
-                >
-                  {activeDay.eventName}
-                </text>
+                {/* Event Name Text Inside Box - HTML foreignObject to wrap multiline properly and never spill out */}
+                <foreignObject x="37" y="444" width="276" height="68">
+                  <div
+                    xmlns="http://www.w3.org/1999/xhtml"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4px 12px',
+                      boxSizing: 'border-box',
+                      textAlign: 'center',
+                      pointerEvents: 'none',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'Share Tech Mono', 'VT323', monospace",
+                        fontSize: '14.5px',
+                        fontWeight: '700',
+                        color: '#f7e599',
+                        letterSpacing: '0.04em',
+                        lineHeight: '1.25',
+                        textTransform: 'uppercase',
+                        textShadow: '0 0 8px rgba(247, 229, 153, 0.75)',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {activeDay.eventName}
+                    </span>
+                  </div>
+                </foreignObject>
               </g>
             </svg>
           </div>
         </div>
 
         {/* ─── 3. Event Schedule Banner (Below Map Frame) ─── */}
-        {/* Full event details clearly displayed on all devices without covering map */}
+        {/* Responsive Content Box displaying eventName with NO subevent */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeDay.id}
@@ -635,13 +762,10 @@ export default function TimelineSection() {
             transition={{ duration: 0.2 }}
           >
             <div className="tva-status-tag">
-              ✦ [{activeDay.badgeLabel}] {activeDay.time}
+              ✦ [{activeDay.badgeLabel}] {activeDay.time} {todayDayId === activeDay.id ? '• LIVE TODAY' : ''}
             </div>
             <div className="tva-status-title">
               {activeDay.eventName}
-            </div>
-            <div className="tva-status-desc">
-              {activeDay.subEvent}
             </div>
           </motion.div>
         </AnimatePresence>
