@@ -8,6 +8,7 @@ const TIMELINE_DAYS = [
     id: 'D-1',
     date: '9TH NOV',
     badgeLabel: 'D-1',
+    subEvent: 'OPENING CEREMONY',
     eventName: 'Opening Ceremony',
     time: 'DAY 1',
     // Positioned right beside the D-1 badge along the entrance road
@@ -21,6 +22,7 @@ const TIMELINE_DAYS = [
     id: 'D-2',
     date: '10TH NOV',
     badgeLabel: 'D-2',
+    subEvent: 'TRACKS & EVALUATION',
     eventName: 'Tracks, mid term and final term evaluation',
     time: 'DAY 2',
     // Positioned right beside the D-2 badge along the entrance road
@@ -33,6 +35,7 @@ const TIMELINE_DAYS = [
     id: 'D-3',
     date: '11TH NOV',
     badgeLabel: 'D-3',
+    subEvent: 'CLOSING CEREMONY',
     eventName: 'Closing ceremony and prize distribution',
     time: 'DAY 3',
     // Positioned right beside the D-3 badge along the entrance road
@@ -45,6 +48,7 @@ const TIMELINE_DAYS = [
     id: 'D-4',
     date: '12TH NOV',
     badgeLabel: 'D-4',
+    subEvent: 'FINAL DAY',
     eventName: 'Final Day',
     time: 'DAY 4',
     // Positioned right beside the D-4 badge along the entrance road
@@ -741,7 +745,7 @@ export default function TimelineSection() {
                         wordBreak: 'break-word',
                       }}
                     >
-                      {activeDay.eventName}
+                      {activeDay.subEvent}
                     </span>
                   </div>
                 </foreignObject>
@@ -752,6 +756,7 @@ export default function TimelineSection() {
 
         {/* ─── 3. Event Schedule Banner (Below Map Frame) ─── */}
         {/* Responsive Content Box displaying eventName with NO subevent */}
+        {/* Responsive Content Box displaying eventName perfectly centered in the middle */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeDay.id}
@@ -766,6 +771,10 @@ export default function TimelineSection() {
             </div>
             <div className="tva-status-title">
               {activeDay.eventName}
+            </div>
+            {/* Symmetrical invisible balancer for exact center alignment on laptop view */}
+            <div className="tva-status-tag-ghost" aria-hidden="true">
+              ✦ {activeDay.time} {todayDayId === activeDay.id ? '• LIVE TODAY' : ''}
             </div>
           </motion.div>
         </AnimatePresence>
