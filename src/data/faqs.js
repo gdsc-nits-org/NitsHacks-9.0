@@ -15,7 +15,7 @@ export const faqsData = [
     id: 3,
     question: "What is the team size requirement?",
     answer:
-      "Teams can consist of 2 to 4 members. You can register with an existing team or find teammates through our official community channels before registrations close.",
+      "Teams can consist of 2 to 5 members. You can register with an existing team or find teammates through our official community channels before registrations close.",
   },
   {
     id: 4,
