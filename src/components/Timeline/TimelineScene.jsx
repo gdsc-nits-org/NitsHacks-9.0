@@ -1,41 +1,102 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from 'react';
+
+import ComicDay0Modal from './ComicDay0Modal';
 import ComicDay1Modal from './ComicDay1Modal';
 import ComicDay2Modal from './ComicDay2Modal';
 import ComicDay3Modal from './ComicDay3Modal';
+
 import helicarrierImg from '../../assets/helicarrier_final.png';
 import quinjetImg from '../../assets/quinjet_final_clean.png';
+
+import lokiImg from '../../assets/loki.png';
 import ultronImg from '../../assets/ultron_perfect.png';
 import thanosImg from '../../assets/thanos_perfect.png';
 import doomImg from '../../assets/doom_perfect.png';
 
-// Path definition in 1024x575 coordinate frame
+// =====================================================
+// TRACK & COORDINATE CONFIGURATION (viewBox 0 0 1024 575)
+// Line 1: Y = 178 (30.96%)
+// Line 2: Y = 257 (44.70%)
+// Line 3: Y = 346 (60.17%)
+// =====================================================
+
 const TRACK_PATH_DATA =
   'M 195 178 L 874.5 178 A 39.5 39.5 0 0 1 874.5 257 L 185.75 257 A 44.75 44.75 0 0 0 185.75 346 L 845 346';
 
-// Target distances along the SVG path for each node
+// Exact distances along the SVG track to stop precisely at the center of each icon
 const TARGET_DISTANCES = {
-  home: 100,    // Initial starting position on top rail (x ~ 295, y ~ 178)
-  ultron: 465,  // Just before Ultron badge on top rail (x ~ 660, y ~ 178)
-  thanos: 1290, // Just before Thanos badge on middle rail (x ~ 380, y ~ 257)
-  doom: 2240,   // Just before Doctor Doom badge on bottom rail (x ~ 800, y ~ 346)
+  home: 100,
+  loki: 200,    // Line 1
+  ultron: 895,  // Line 2 (shifted rightward toward the bend)
+  thanos: 1300, // Line 2 (left section)
+  doom: 2240,   // Line 3
 };
 
-// Which comic popup belongs to which character
 const DAY_FOR_TARGET = {
+  loki: 0,
   ultron: 1,
   thanos: 2,
   doom: 3,
 };
 
+// Unified character metadata
+const CHARACTERS = [
+  {
+    key: 'loki',
+    day: 0,
+    name: 'Loki',
+    dayLabel: 'DAY 0',
+    img: lokiImg,
+    leftPercent: '38.5%',
+    topPercent: '30.96%',
+    glowColor: 'rgba(34, 197, 94, 0.9)', // Green
+  },
+  {
+    key: 'ultron',
+    day: 1,
+    name: 'Ultron',
+    dayLabel: 'DAY 1',
+    img: ultronImg,
+    // Shifted right on the second line
+    leftPercent: '67.5%',
+    topPercent: '44.70%',
+    glowColor: 'rgba(239, 68, 68, 0.95)', // Red
+  },
+  {
+    key: 'thanos',
+    day: 2,
+    name: 'Thanos',
+    dayLabel: 'DAY 2',
+    img: thanosImg,
+    leftPercent: '25.4%',
+    topPercent: '44.70%',
+    glowColor: 'rgba(168, 85, 247, 0.95)', // Purple
+  },
+  {
+    key: 'doom',
+    day: 3,
+    name: 'Doctor Doom',
+    dayLabel: 'DAY 3',
+    img: doomImg,
+    leftPercent: '80.0%',
+    topPercent: '60.17%',
+    glowColor: 'rgba(16, 185, 129, 0.95)', // Emerald
+  },
+];
+
 export default function TimelineScene() {
   const pathRef = useRef(null);
   const animFrameRef = useRef(null);
   const currentDistRef = useRef(TARGET_DISTANCES.home);
-  // null = no popup, otherwise 1 | 2 | 3
-  const [openDay, setOpenDay] = useState(null);
 
+  const [openDay, setOpenDay] = useState(null);
   const [ship, setShip] = useState({
-    x: 295,
+    x: 195,
     y: 178,
     angle: 0,
     flipY: false,
@@ -43,50 +104,46 @@ export default function TimelineScene() {
     activeTarget: null,
   });
 
-  // Calculate coordinates, tangent angle and vertical flip at distance s along the path
+  // Calculate Quinjet Position & Angle
   const getShipTransform = useCallback((s, isForward = true) => {
     if (!pathRef.current) return null;
+
     const path = pathRef.current;
     const totalLength = path.getTotalLength();
     const clampedS = Math.max(0, Math.min(totalLength, s));
-
     const pt = path.getPointAtLength(clampedS);
 
-    // Calculate tangent vector for rotation
     const delta = 2;
     const s1 = Math.max(0, clampedS - delta);
     const s2 = Math.min(totalLength, clampedS + delta);
+
     const p1 = path.getPointAtLength(s1);
     const p2 = path.getPointAtLength(s2);
 
-    // If moving forward, vector is p1 -> p2; if backward, reverse it so nose always leads
     const dx = isForward ? p2.x - p1.x : p1.x - p2.x;
     const dy = isForward ? p2.y - p1.y : p1.y - p2.y;
-    let angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
-    // When the ship faces leftwards (|angle| > 90), flip Y so the cockpit canopy stays upright
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
     const flipY = Math.abs(angle) > 90;
 
-    return { x: pt.x, y: pt.y, angle, flipY };
+    return {
+      x: pt.x,
+      y: pt.y,
+      angle,
+      flipY,
+    };
   }, []);
 
-  // Initialize ship position once path is mounted
+  // Initialize Ship
   useEffect(() => {
-    if (pathRef.current) {
-      const transform = getShipTransform(TARGET_DISTANCES.home, true);
-      if (transform) {
-        setShip((prev) => ({
-          ...prev,
-          x: transform.x,
-          y: transform.y,
-          angle: transform.angle,
-          flipY: transform.flipY,
-        }));
-      }
+    if (!pathRef.current) return;
+    const transform = getShipTransform(TARGET_DISTANCES.home, true);
+    if (transform) {
+      setShip((prev) => ({ ...prev, ...transform }));
     }
   }, [getShipTransform]);
 
-  // Clean up any running animation on unmount
+  // Cleanup Animation Frame
   useEffect(() => {
     return () => {
       if (animFrameRef.current) {
@@ -95,19 +152,24 @@ export default function TimelineScene() {
     };
   }, []);
 
-  // Animate spacecraft smoothly along path to clicked character
+  // Smooth Movement
   const moveToCharacter = useCallback(
     (targetKey) => {
       if (!pathRef.current) return;
+
       const targetDist = TARGET_DISTANCES[targetKey];
       if (targetDist === undefined) return;
 
       const startDist = currentDistRef.current;
       const distanceDiff = targetDist - startDist;
 
-      // Already at this destination
       if (Math.abs(distanceDiff) < 2) {
-        if (DAY_FOR_TARGET[targetKey]) {
+        setShip((prev) => ({
+          ...prev,
+          isMoving: false,
+          activeTarget: targetKey === 'home' ? null : targetKey,
+        }));
+        if (DAY_FOR_TARGET[targetKey] !== undefined) {
           setOpenDay(DAY_FOR_TARGET[targetKey]);
         }
         return;
@@ -118,8 +180,10 @@ export default function TimelineScene() {
       }
 
       const isForward = distanceDiff >= 0;
-      // Duration scaled by distance: smooth cinematic pace (0.9s to 2.2s)
-      const duration = Math.min(2200, Math.max(900, Math.abs(distanceDiff) * 0.95));
+      const duration = Math.min(
+        2200,
+        Math.max(900, Math.abs(distanceDiff) * 0.95)
+      );
       const startTime = performance.now();
 
       setShip((prev) => ({
@@ -132,7 +196,6 @@ export default function TimelineScene() {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        // Smooth easeInOutCubic curve
         const ease =
           progress < 0.5
             ? 4 * progress * progress * progress
@@ -145,32 +208,22 @@ export default function TimelineScene() {
           const transform = getShipTransform(currentS, isForward);
           if (transform) {
             setShip({
-              x: transform.x,
-              y: transform.y,
-              angle: transform.angle,
-              flipY: transform.flipY,
+              ...transform,
               isMoving: true,
               activeTarget: targetKey,
             });
           }
           animFrameRef.current = requestAnimationFrame(step);
         } else {
-          // Settled at destination: ALWAYS face forward along natural track direction
-          // At origin/home: faces 0deg (pointing away from Helicarrier toward mission path)
           const restTransform = getShipTransform(targetDist, true);
           if (restTransform) {
             setShip({
-              x: restTransform.x,
-              y: restTransform.y,
-              angle: restTransform.angle,
-              flipY: restTransform.flipY,
+              ...restTransform,
               isMoving: false,
               activeTarget: targetKey === 'home' ? null : targetKey,
             });
           }
-
-          // Open the matching comic popup on arrival (Day 1 Ultron, Day 2 Thanos, Day 3 Doom)
-          if (DAY_FOR_TARGET[targetKey]) {
+          if (DAY_FOR_TARGET[targetKey] !== undefined) {
             setOpenDay(DAY_FOR_TARGET[targetKey]);
           }
         }
@@ -183,62 +236,62 @@ export default function TimelineScene() {
 
   return (
     <div className="relative w-full min-h-screen flex flex-col items-center justify-between px-3 sm:px-6 py-6 md:py-10 select-none overflow-hidden">
-
-      {/* ── 1. TOP HEADING ── */}
+      
+      {/* ================= TITLE ================= */}
       <div className="w-full text-center z-20 pt-2 sm:pt-4">
         <h1
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black italic tracking-widest text-white uppercase inline-block cursor-default"
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black italic tracking-widest text-white uppercase inline-block"
           style={{
             fontFamily: "'Bangers', 'Impact', sans-serif",
             letterSpacing: '0.08em',
             textShadow:
-              '0 3px 12px rgba(0, 0, 0, 0.9), 0 0 24px rgba(255, 255, 255, 0.25)',
+              '0 3px 12px rgba(0,0,0,0.9), 0 0 24px rgba(255,255,255,0.25)',
           }}
         >
           TIMELINE
         </h1>
       </div>
 
-      {/* ── 2. TRACK + CHARACTERS (1024x575 coordinate frame matching reference image) ── */}
-      <div className="relative w-full max-w-[1100px] aspect-[1024/575] flex items-center justify-center my-auto">
-
-        {/* SVG Yellow Track */}
+      {/* ================= TRACK CONTAINER ================= */}
+      <div className="relative w-full max-w-[1120px] aspect-[1024/575] flex items-center justify-center my-auto">
+        
+        {/* SVG TRACK */}
         <svg
           viewBox="0 0 1024 575"
           className="w-full h-full absolute inset-0 overflow-visible pointer-events-none"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Subtle warm underglow */}
+          {/* Outer Glow */}
           <path
             d={TRACK_PATH_DATA}
             stroke="#eab308"
-            strokeWidth="18"
+            strokeWidth="20"
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.35"
-            style={{ filter: 'blur(3px)' }}
+            opacity="0.3"
+            style={{ filter: 'blur(4px)' }}
           />
-          {/* Solid bright yellow track matching reference image */}
+          {/* Main Bright Track */}
           <path
             ref={pathRef}
             d={TRACK_PATH_DATA}
-            stroke="#ffd000"
+            stroke="#ffcc00"
             strokeWidth="14"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
 
-        {/* ── HELICARRIER (Top Left, clickable to send ship back home) ── */}
+        {/* ================= HELICARRIER ================= */}
         <div
           onClick={() => moveToCharacter('home')}
           className="absolute z-20 cursor-pointer animate-float-slow group transition-transform duration-300 hover:scale-105"
           title="Return spacecraft to launch dock"
           style={{
-            left: '5.8%',
+            left: '5.2%',
             top: '17.4%',
-            width: '15.6%',
+            width: '16%',
             aspectRatio: '160/145',
           }}
         >
@@ -249,7 +302,7 @@ export default function TimelineScene() {
           />
         </div>
 
-        {/* ── ANIMATED QUINJET SPACECRAFT (Locked to yellow rail at rest and in motion) ── */}
+        {/* ================= QUINJET ================= */}
         <div
           className="absolute z-[25] pointer-events-none"
           style={{
@@ -261,15 +314,17 @@ export default function TimelineScene() {
               ship.flipY ? 'scaleY(-1)' : ''
             }`,
             transformOrigin: '50% 68%',
-            transition: ship.isMoving ? 'none' : 'transform 0.4s ease-out',
+            transition: ship.isMoving
+              ? 'none'
+              : 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          {/* Engine thruster glow when moving */}
           {ship.isMoving && (
             <div
-              className="absolute -left-3 top-[68%] -translate-y-1/2 w-6 h-3 bg-sky-400 rounded-full blur-[3px] opacity-80 pointer-events-none"
+              className="absolute -left-3 top-[68%] -translate-y-1/2 w-6 h-3 bg-sky-400 rounded-full blur-[3px] opacity-80"
               style={{
-                boxShadow: '0 0 12px 4px rgba(56,189,248,0.9), 0 0 20px rgba(14,165,233,0.6)',
+                boxShadow:
+                  '0 0 12px 4px rgba(56,189,248,0.9), 0 0 20px rgba(14,165,233,0.6)',
               }}
             />
           )}
@@ -280,108 +335,85 @@ export default function TimelineScene() {
           />
         </div>
 
-        {/* ── ULTRON BADGE (Top Right curve) ── */}
-        <div
-          onClick={() => moveToCharacter('ultron')}
-          className={`absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 group ${
-            ship.activeTarget === 'ultron' ? 'scale-105' : ''
-          }`}
-          title="Fly to Ultron"
-          style={{
-            left: '74.37%',
-            top: '30.87%',
-            width: '10.84%',
-            aspectRatio: '1/1',
-          }}
-        >
-          <img
-            src={ultronImg}
-            alt="Ultron"
-            className={`w-full h-full object-contain rounded-full transition-all duration-300 ${
-              ship.activeTarget === 'ultron'
-                ? 'drop-shadow-[0_0_22px_rgba(239,68,68,0.95)]'
-                : 'group-hover:drop-shadow-[0_0_16px_rgba(239,68,68,0.7)]'
-            }`}
-          />
-        </div>
+        {/* ================= IDENTICAL SIZED & ALIGNED ICONS ================= */}
+        {CHARACTERS.map((char) => {
+          const isActive = ship.activeTarget === char.key;
+          return (
+            <div
+              key={char.key}
+              onClick={() => moveToCharacter(char.key)}
+              className={`absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95 group flex flex-col items-center ${
+                isActive ? 'scale-110' : ''
+              }`}
+              title={`Fly to ${char.name} - ${char.dayLabel}`}
+              style={{
+                left: char.leftPercent,
+                top: char.topPercent,
+                width: 'clamp(58px, 8.8vw, 92px)',
+                height: 'clamp(58px, 8.8vw, 92px)',
+              }}
+            >
+              {/* Perfectly uniform circular container */}
+              <div
+                className="w-full h-full rounded-full border-[3.5px] border-white overflow-hidden bg-slate-900 shadow-2xl transition-all duration-300 flex items-center justify-center"
+                style={{
+                  boxShadow: isActive
+                    ? `0 0 24px 6px ${char.glowColor}, 0 4px 14px rgba(0,0,0,0.9)`
+                    : `0 0 14px 2px ${char.glowColor}, 0 4px 10px rgba(0,0,0,0.8)`,
+                }}
+              >
+                <img
+                  src={char.img}
+                  alt={char.name}
+                  className="w-full h-full object-cover object-center transform transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
 
-        {/* ── THANOS BADGE (Middle Track, perfectly centered) ── */}
-        <div
-          onClick={() => moveToCharacter('thanos')}
-          className={`absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 group ${
-            ship.activeTarget === 'thanos' ? 'scale-105' : ''
-          }`}
-          title="Fly to Thanos"
-          style={{
-            left: '28.56%',
-            top: '44.96%',
-            width: '10.84%',
-            aspectRatio: '1/1',
-          }}
-        >
-          <img
-            src={thanosImg}
-            alt="Thanos"
-            className={`w-full h-full object-contain rounded-full transition-all duration-300 ${
-              ship.activeTarget === 'thanos'
-                ? 'drop-shadow-[0_0_22px_rgba(168,85,247,0.95)]'
-                : 'group-hover:drop-shadow-[0_0_16px_rgba(168,85,247,0.7)]'
-            }`}
-          />
-        </div>
-
-        {/* ── DOCTOR DOOM BADGE (Bottom Right terminal) ── */}
-        <div
-          onClick={() => moveToCharacter('doom')}
-          className={`absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 group ${
-            ship.activeTarget === 'doom' ? 'scale-105' : ''
-          }`}
-          title="Fly to Doctor Doom"
-          style={{
-            left: '87.74%',
-            top: '59.74%',
-            width: '10.84%',
-            aspectRatio: '1/1',
-          }}
-        >
-          <img
-            src={doomImg}
-            alt="Doctor Doom"
-            className={`w-full h-full object-contain rounded-full transition-all duration-300 ${
-              ship.activeTarget === 'doom'
-                ? 'drop-shadow-[0_0_22px_rgba(34,197,94,0.95)]'
-                : 'group-hover:drop-shadow-[0_0_16px_rgba(34,197,94,0.7)]'
-            }`}
-          />
-        </div>
+              {/* Day Label */}
+              <span
+                className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] sm:text-xs font-black tracking-widest text-white px-2 py-0.5 rounded shadow-md bg-black/70 border border-white/20"
+                style={{
+                  fontFamily: "'Bangers', 'Impact', sans-serif",
+                  letterSpacing: '0.08em',
+                }}
+              >
+                {char.dayLabel}
+              </span>
+            </div>
+          );
+        })}
 
       </div>
 
-      {/* ── 3. BOTTOM FOOTER TEXT ── */}
+      {/* ================= FOOTER ================= */}
       <div className="w-full text-center z-20 pb-2 sm:pb-4">
         <p
-          className="text-lg sm:text-xl md:text-2xl font-bold italic tracking-wider text-white uppercase inline-block cursor-default"
+          className="text-lg sm:text-xl md:text-2xl font-bold italic tracking-wider text-white uppercase inline-block"
           style={{
             fontFamily: "'Bangers', 'Impact', sans-serif",
             letterSpacing: '0.06em',
             textShadow:
-              '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(255, 255, 255, 0.2)',
+              '0 2px 8px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.2)',
           }}
         >
           CLICK ON THE ICONS TO START
         </p>
       </div>
 
-      {/* ── 4. COMIC POPUP MODALS ── */}
-      {/* Day 1 - Ultron */}
+      {/* ================= COMIC MODALS ================= */}
+      <ComicDay0Modal
+        isOpen={openDay === 0}
+        onClose={() => setOpenDay(null)}
+        onNext={() => moveToCharacter('ultron')}
+      />
+
       <ComicDay1Modal
         isOpen={openDay === 1}
         onClose={() => setOpenDay(null)}
         onNext={() => moveToCharacter('thanos')}
-        onPrev={() => moveToCharacter('home')}
+        onPrev={() => moveToCharacter('loki')}
       />
 
-      {/* Day 2 - Thanos */}
       <ComicDay2Modal
         isOpen={openDay === 2}
         onClose={() => setOpenDay(null)}
@@ -389,7 +421,6 @@ export default function TimelineScene() {
         onPrev={() => moveToCharacter('ultron')}
       />
 
-      {/* Day 3 - Doctor Doom */}
       <ComicDay3Modal
         isOpen={openDay === 3}
         onClose={() => setOpenDay(null)}

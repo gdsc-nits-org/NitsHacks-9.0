@@ -13,7 +13,8 @@
 .tp-head__card {
   position: absolute;
   inset: 0;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     filter 0.35s ease;
   will-change: transform;
 }
@@ -35,7 +36,9 @@
 .tp-head__edge {
   fill: none;
   stroke-linejoin: round;
-  transition: stroke 0.35s ease, stroke-opacity 0.35s ease;
+  transition:
+    stroke 0.35s ease,
+    stroke-opacity 0.35s ease;
 }
 .tp-head__rim {
   stroke: #ffe9a3;
@@ -120,9 +123,9 @@
   top: 71.2%;
   margin: 0;
   text-align: center;
-  font-family: 'Bangers', 'Luckiest Guy', Impact, sans-serif;
+  font-family: "Bangers", "Luckiest Guy", Impact, sans-serif;
   font-weight: 400;
-  font-size: 13.2cqw;
+  font-size: 11cqw;
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -142,9 +145,9 @@
   top: 81.4%;
   margin: 0;
   text-align: center;
-  font-family: 'Orbitron', 'Montserrat', sans-serif;
+  font-family: "Orbitron", "Montserrat", sans-serif;
   font-weight: 600;
-  font-size: 4.3cqw;
+  font-size: 6.7cqw;
   letter-spacing: 0.03em;
   color: #fff;
 }
@@ -163,7 +166,9 @@
   width: 8.8cqw;
   height: 8.8cqw;
   display: block;
-  transition: transform 0.2s ease, color 0.3s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.3s ease;
 }
 .tp-head__links .tp-social svg {
   width: 100%;
