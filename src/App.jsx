@@ -6,6 +6,7 @@ import FAQsPage from './pages/FAQsPage'
 import TrackPage from './pages/Trackpage'
 import LandingPage from './pages/LandingPage'
 import ComingSoon from './pages/ComingSoon'
+import LoaderPage from './pages/LoaderPage'
 import Navbar from './components/Navbar'
 
 function ScrollToTop() {

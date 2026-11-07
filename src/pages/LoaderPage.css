@@ -1,0 +1,472 @@
+/* Custom keyframes and styling for NITS HACKS 9.0 Loader Page */
+
+/* Base Character gentle breathing float */
+@keyframes stanFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Pulsing "LOADING" marquee banner */
+@keyframes loadingPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.5)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.3));
+  }
+  50% {
+    transform: scale(1.025);
+    filter: drop-shadow(0 0 18px rgba(220, 38, 38, 0.85)) drop-shadow(0 0 30px rgba(255, 90, 90, 0.5));
+  }
+}
+
+/* Glowing progress bar fill */
+@keyframes comicBarGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(255, 255, 255, 1), 0 0 28px rgba(255, 255, 255, 0.65);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Falling Superhero Badges Stream
+   All badges originate at Stan Lee's pinched fingers (left: ~22%, top: ~14%),
+   fall downwards across his chest, and vanish just above the bottom loading bar.
+───────────────────────────────────────────────────────────────────────────── */
+
+@keyframes fallPath1 {
+  0% {
+    top: 14%;
+    left: 22%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(0.9) rotate(-15deg);
+  }
+  45% {
+    top: 40%;
+    left: 17%;
+    opacity: 1;
+    transform: scale(1) rotate(-35deg);
+  }
+  74% {
+    top: 65%;
+    left: 14%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(-55deg);
+  }
+  88% {
+    top: 73%;
+    left: 12%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(-70deg);
+  }
+  100% {
+    top: 76%;
+    left: 11%;
+    opacity: 0;
+    transform: scale(0.5) rotate(-80deg);
+  }
+}
+
+@keyframes fallPath2 {
+  0% {
+    top: 14%;
+    left: 22.5%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(0.9) rotate(10deg);
+  }
+  48% {
+    top: 42%;
+    left: 26%;
+    opacity: 1;
+    transform: scale(1) rotate(35deg);
+  }
+  76% {
+    top: 66%;
+    left: 28%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(60deg);
+  }
+  90% {
+    top: 74%;
+    left: 30%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(75deg);
+  }
+  100% {
+    top: 77%;
+    left: 31%;
+    opacity: 0;
+    transform: scale(0.5) rotate(85deg);
+  }
+}
+
+@keyframes fallPath3 {
+  0% {
+    top: 14%;
+    left: 22%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(0.9) rotate(-10deg);
+  }
+  50% {
+    top: 43%;
+    left: 34%;
+    opacity: 1;
+    transform: scale(1) rotate(20deg);
+  }
+  76% {
+    top: 67%;
+    left: 39%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(45deg);
+  }
+  90% {
+    top: 74%;
+    left: 41%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(60deg);
+  }
+  100% {
+    top: 77%;
+    left: 42%;
+    opacity: 0;
+    transform: scale(0.5) rotate(70deg);
+  }
+}
+
+@keyframes fallPath4 {
+  0% {
+    top: 14%;
+    left: 21.5%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(0.85) rotate(15deg);
+  }
+  45% {
+    top: 38%;
+    left: 20%;
+    opacity: 1;
+    transform: scale(1) rotate(50deg);
+  }
+  75% {
+    top: 64%;
+    left: 22%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(100deg);
+  }
+  88% {
+    top: 73%;
+    left: 23%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(130deg);
+  }
+  100% {
+    top: 76%;
+    left: 24%;
+    opacity: 0;
+    transform: scale(0.5) rotate(145deg);
+  }
+}
+
+@keyframes fallPath5 {
+  0% {
+    top: 14%;
+    left: 23%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(0.9) rotate(15deg);
+  }
+  52% {
+    top: 45%;
+    left: 43%;
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  78% {
+    top: 68%;
+    left: 51%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(75deg);
+  }
+  90% {
+    top: 75%;
+    left: 54%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(90deg);
+  }
+  100% {
+    top: 77%;
+    left: 56%;
+    opacity: 0;
+    transform: scale(0.5) rotate(100deg);
+  }
+}
+
+@keyframes fallPath6 {
+  0% {
+    top: 14%;
+    left: 21%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(0.9) rotate(-5deg);
+  }
+  42% {
+    top: 38%;
+    left: 11%;
+    opacity: 1;
+    transform: scale(1) rotate(-30deg);
+  }
+  74% {
+    top: 63%;
+    left: 8%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(-55deg);
+  }
+  88% {
+    top: 72%;
+    left: 6%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(-70deg);
+  }
+  100% {
+    top: 75%;
+    left: 5%;
+    opacity: 0;
+    transform: scale(0.5) rotate(-80deg);
+  }
+}
+
+@keyframes fallPath7 {
+  0% {
+    top: 14%;
+    left: 23%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(0.9) rotate(-15deg);
+  }
+  48% {
+    top: 43%;
+    left: 36%;
+    opacity: 1;
+    transform: scale(1) rotate(15deg);
+  }
+  77% {
+    top: 67%;
+    left: 45%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(50deg);
+  }
+  90% {
+    top: 75%;
+    left: 48%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(65deg);
+  }
+  100% {
+    top: 77%;
+    left: 49%;
+    opacity: 0;
+    transform: scale(0.5) rotate(75deg);
+  }
+}
+
+@keyframes fallPath8 {
+  0% {
+    top: 14%;
+    left: 22%;
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(0.9) rotate(20deg);
+  }
+  45% {
+    top: 41%;
+    left: 29%;
+    opacity: 1;
+    transform: scale(1) rotate(-15deg);
+  }
+  75% {
+    top: 66%;
+    left: 34%;
+    opacity: 0.9;
+    transform: scale(0.95) rotate(-40deg);
+  }
+  89% {
+    top: 74%;
+    left: 36%;
+    opacity: 0.25;
+    transform: scale(0.8) rotate(-55deg);
+  }
+  100% {
+    top: 76%;
+    left: 37%;
+    opacity: 0;
+    transform: scale(0.5) rotate(-65deg);
+  }
+}
+
+/* Badge common base */
+.falling-badge {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+  will-change: top, left, transform, opacity;
+  animation-timing-function: cubic-bezier(0.35, 0.45, 0.4, 0.95);
+  animation-iteration-count: infinite;
+}
+
+.falling-badge-1 {
+  animation-name: fallPath1;
+  animation-duration: 2.7s;
+  animation-delay: -2.4s;
+  width: 7.4%;
+}
+
+.falling-badge-2 {
+  animation-name: fallPath2;
+  animation-duration: 2.9s;
+  animation-delay: -2.05s;
+  width: 6.6%;
+}
+
+.falling-badge-3 {
+  animation-name: fallPath3;
+  animation-duration: 2.8s;
+  animation-delay: -1.7s;
+  width: 6.4%;
+}
+
+.falling-badge-4 {
+  animation-name: fallPath4;
+  animation-duration: 3.0s;
+  animation-delay: -1.35s;
+  width: 7.2%;
+}
+
+.falling-badge-5 {
+  animation-name: fallPath5;
+  animation-duration: 3.1s;
+  animation-delay: -1.0s;
+  width: 8.2%;
+}
+
+.falling-badge-6 {
+  animation-name: fallPath6;
+  animation-duration: 2.8s;
+  animation-delay: -0.65s;
+  width: 7.8%;
+}
+
+.falling-badge-7 {
+  animation-name: fallPath7;
+  animation-duration: 2.9s;
+  animation-delay: -0.3s;
+  width: 6.6%;
+}
+
+.falling-badge-8 {
+  animation-name: fallPath8;
+  animation-duration: 2.7s;
+  animation-delay: 0s;
+  width: 6.4%;
+}
+
+/* Layout and Containers */
+.loader-page-wrapper {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0d0f14;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'Montserrat', sans-serif;
+  z-index: 9999;
+}
+
+.loader-page-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.04) brightness(0.98);
+  z-index: 1;
+}
+
+.loader-glow-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 235, 140, 0.28) 0%,
+    rgba(255, 215, 80, 0.15) 35%,
+    rgba(10, 10, 15, 0.25) 75%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.loader-character-container {
+  animation: stanFloat 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-loading-pulse {
+  animation: loadingPulse 2.8s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+.loader-progress-track {
+  position: relative;
+  border: 3.5px solid #000000;
+  border-radius: 9999px;
+  background-color: rgba(20, 20, 22, 0.65);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 2.5px;
+  overflow: hidden;
+}
+
+.loader-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 100%);
+  animation: comicBarGlow 2.5s ease-in-out infinite;
+  transition: width 0.15s ease-out;
+  will-change: width;
+}
